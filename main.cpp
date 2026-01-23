@@ -161,33 +161,6 @@ void printWelcome(){
          << "================================================================\n";
 }
 
-void showSystemInfo(){
-    system("cls");
-    printWelcome();
-
-    cout << "[!] iSKEDYUL >> SYSTEM OVERVIEW\n"
-         << "----------------------------------------------------------------\n\n"
-         << "Hi, iSKO! :)\n"
-         << "  Are U ready to use iSKEDYUL?\n\n"
-         << "> ABOUT iSKEDYUL\n"
-         << "iSKEDYUL is a C++ console-based scheduling and classroom\n"
-         << "reservation system developed for the Polytechnic University\n"
-         << "of the Philippines (PUP) - Lopez Campus.\n\n"
-
-         << "> AVAILABLE FACILITIES\n"
-         << "iSKEDYUL manages reservations for the following academic buildings:\n"
-         << "1. ICT Laboratories\n"
-         << "2. Health and Sciences Building\n"
-         << "3. Engineering and Architecture Building\n"
-         << "4. Nantes Building\n"
-         << "5. Public Administration and Education Building\n"
-         << "6. Hospitality Management Laboratories\n\n"
-
-         << "================================================================\n\n"
-         << "> Press Enter to continue to Login Portal...";
-    cin.get();
-}
-
 // load function - every open ng system; data is not empty
 void loadData(){
     ifstream uFile("iSKEV1users.txt");
@@ -1285,3 +1258,4 @@ void exitProgram(){
          << "> Press Enter to exit the program...";
     cin.ignore();
 }
+
