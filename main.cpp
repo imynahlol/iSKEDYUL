@@ -1,8 +1,8 @@
 #include <iostream>
-#include <fstream> //file handling
-#include <string>
-#include <cstdlib> //clear screen
+#include <cstdlib>
 #include <iomanip>
+#include <fstream>
+#include <string>
 
 using namespace std;
 
@@ -13,10 +13,10 @@ const int maxUser = 10000;
 const int maxReservation = 100000;
 
 //for user data arrays
-string uIDs[maxUser];
-string uName[maxUser];
-string uType[maxUser];
-string uProgram[maxUser];
+string userID[maxUser];
+string userName[maxUser];
+string userType[maxUser];
+string userProg[maxUser];
 int userCount = 0;
 
 //for reservation data arrays
@@ -47,28 +47,28 @@ const string buildings[maxBuilding] = {
 };
 // room numbers 2d array
 const string roomNumbers[maxBuilding][maxRoom] = {
-    {"LQ-103 (ICT Lab 1)", "LQ-104 (ICT Lab 2)", "LQ-207 (ICT Lab 3)",
+    {"LQ-103 |Lab 1", "LQ-104 |Lab 2", "LQ-207 |Lab 3",
      "","","","","","","","",""},
 
-    {"LQ-105 (FOOD LAB)","LQ-106","LQ-107","LQ-108","LQ-203",
-     "LQ-204","LQ-205 (PHYS LAB)","LQ-206 (CHEM LAB)","","","",""},
+    {"LQ-105 |FOOD LAB","LQ-106","LQ-107","LQ-108","LQ-203",
+     "LQ-204","LQ-205 |PHYS LAB","LQ-206 |CHEM LAB","","","",""},
 
-    {"LQ-109","LQ-110","LQ-111 (EE LAB)","LQ-112 (CE LAB)",
-     "LQ-113","LQ-114","LQ-115","LQ-116","LQ-208 (DRAFT LAB)",
-     "LQ-209 (CEA FUNC. RM.)","LQ-210","LQ-211"},
+    {"LQ-109","LQ-110","","",
+     "LQ-113","LQ-114","LQ-115","LQ-116","LQ-208 |DRAFT LAB",
+     "LQ-209 |CEA FUNC. RM.","LQ-210","LQ-211"},
 
-    {"LQ-120","LQ-121","LQ-122","LQ-216 | SPEECH LAB",
-     "LQ-217 (KEY. LAB)","LQ-218 (SIMULATION RM./AVR)","","","","","",""},
+    {"LQ-120","LQ-121","LQ-122","LQ-216 |SPEECH LAB",
+     "LQ-217 |KEY. LAB","LQ-218 |SIMULATION RM./AVR","","","","","",""},
 
-    {"LQ-117","LQ-118","LQ-119 (EDTECH)","LQ-212",
+    {"LQ-117","LQ-118","LQ-119 |EDTECH","LQ-212",
      "LQ-213","LQ-214","LQ-215","","","","","",},
 
-    {"LQ-100 (KITCHEN LAB)","LQ-101 (BEVERAGE LAB)",
-     "LQ-102 (TISSUE LAB)","","","","","","","","",""}
+    {"LQ-100 |KITCHEN LAB","LQ-101 |BEVERAGE LAB",
+     "LQ-102 |TISSUE LAB","","","","","","","","",""}
 
 };
 
-//function declaration
+//function declaration returning = 7, nonr = 13
 void printHeader();
 void printWelcome();
 void showSystemInfo();
@@ -92,13 +92,12 @@ void cancelReservation();
 void exitProgram();
 
 int main(){
-    showSystemInfo();
-    int choice;
     bool running = true;
 
     while (running){
         system("cls");
         printWelcome();
+        int choice;
 
         cout << endl
              << "   > ACCESS PORTAL:\n\n"
@@ -115,14 +114,14 @@ int main(){
                 loadData();
                 registerUser();
                 saveData();
-                break;
+            break;
 
             case 2:
                 loadData();
                 if (loginUser()){
                     mainMenu();
                 }
-                break;
+            break;
 
             case 3:
                 system("cls");
@@ -163,18 +162,19 @@ void printWelcome(){
 
 // load function - every open ng system; data is not empty
 void loadData(){
-    ifstream uFile("iSKEV1users.txt");
+    ifstream uFile("iSKEV1users.txt"); //for reading file
     ifstream resFile("iSKEV1reservations.txt");
 
     //load users
     if (uFile.is_open()){
         userCount = 0;
-        while (getline(uFile, uIDs[userCount], '|')){
-               getline(uFile, uName[userCount], '|');
-               getline(uFile, uType[userCount], '|');
-               getline(uFile, uProgram[userCount]);
+        while (getline(uFile, userID[userCount], '|')){
+               getline(uFile, userName[userCount], '|');
+               getline(uFile, userType[userCount], '|');
+               getline(uFile, userProg[userCount]);
         userCount++;
-        if (userCount >= maxUser) break;
+        if (userCount >= maxUser)
+            break;
         }
     uFile.close(); //when done
     }
@@ -191,7 +191,8 @@ void loadData(){
                    getline(resFile, resUProg[reservationCount], '|');
                    getline(resFile, resStatus[reservationCount]);
         reservationCount++;
-            if (reservationCount >= maxReservation) break;
+            if (reservationCount >= maxReservation)
+                break;
             }
         resFile.close();
     }
@@ -199,15 +200,15 @@ void loadData(){
 
 //for data to save, temporary to permanent data
 void saveData(){
-    ofstream uFile("iSKEV1users.txt");
+    ofstream uFile("iSKEV1users.txt"); //for writing file
     ofstream resfile("iSKEV1reservations.txt");
 
     //save users
     for (int u = 0; u < userCount; u++){
-        uFile << uIDs[u] << "|"
-              << uName[u] << "|"
-              << uType[u] << "|"
-              << uProgram[u] << "\n";
+        uFile << userID[u] << "|"
+              << userName[u] << "|"
+              << userType[u] << "|"
+              << userProg[u] << "\n";
             }
     uFile.close();
 
@@ -221,53 +222,50 @@ void saveData(){
                 << resUName[r] << "|"
                 << resUProg[r] << "|"
                 << resStatus[r] << "\n";
-            }
+    }
     resfile.close();
 }
 
 bool validateIDformat(string id, string type){ // ID validation function
     if (type == "Faculty"){ //valid faculty ID: 5 digits
         if (id.length() != 5){
-            cout << "[X] Invalid Format!\n"
-                 << "    Faculty ID must be exactly 5 digits.\n";
+            cout << "[X] Invalid Format! Enter 5 Digits only.\n"
+                 << "[!] Expected Format: XXXXX\n";
             return false;
-                }
+        }
 
         for (int i = 0; i < 5; i++){ //char must use digit only
             if (!isdigit(id[i])){
                 cout << "[X] Invalid Format!\n"
                      << "    Faculty ID must contain only digit.";
             return false;
-                }
+            }
         }
     return true;
 
-        } else if (type == "Student") { //Valid student ID Format: 20XX-XXXXX-LQ-0
-            if (id.length() != 15) {
-                cout << "[X] Invalid Format!\n"
-                     << "    Student ID must contain 15 Characters only.\n\n"
-                     << "[!] Expected Format: 20XX-XXXXX-LQ-0";
-                return false;
-                    }
+    } else if (type == "Student") { //Valid student ID Format: 20XX-XXXXX-LQ-0
+        if (id.length() != 15) {
+            cout << "[X] Invalid Format!\n\n"
+                 << "[!] Expected Format: 20XX-XXXXX-LQ-0";
+            return false;
+        }
 
         // checking of student ID (DASHES)
-            if (id[4] != '-' || id[10] != '-' || id[13] != '-'){
-                cout << "[X] Invalid Format!\n"
-                     << "    Incorrect Dash Position.\n\n"
-                     << "[!] Expected Format: 20XX-XXXXX-LQ-0";
-                return false;
-                }
+        if (id[4] != '-' || id[10] != '-' || id[13] != '-'){
+            cout << "[X] Invalid Format! Incorrect Dash Position.\n\n"
+                 << "[!] Expected Format: 20XX-XXXXX-LQ-0";
+            return false;
+        }
 
     //ID validation per part
     bool valid = true;
-
         //Part 1: must start with "20"
         if (valid && (id[0] != '2' || id[1] != '0')){
             cout << "[X] Invalid Format!\n"
                  << "    ID must start with '20'.\n\n"
                  << "[!] Expected Format: 20XX-XXXXX-LQ-0";
-            valid = false;
-                }
+            return false;
+        }
 
         //Part 1.1: check positions 2-3 are digits/year ('25' for 2025)
         for (int i = 2; i <= 3; i++){
@@ -275,7 +273,7 @@ bool validateIDformat(string id, string type){ // ID validation function
                 cout << "[X] Invalid Format!\n"
                      << "    Year must be in digit.\n\n"
                      << "[!] Expected Format: 20XX-XXXXX-LQ-0";
-            valid = false;
+            return false;
                 break;
             }
         }
@@ -287,7 +285,7 @@ bool validateIDformat(string id, string type){ // ID validation function
                     cout << "[X] Invalid Format!\n"
                          << "    ID must be 5 Digit Student Number.\n\n"
                          << "[!] Expected Format: 20XX-XXXXX-LQ-0";
-                valid = false;
+                return false;
                     break;
                 }
             }
@@ -298,7 +296,7 @@ bool validateIDformat(string id, string type){ // ID validation function
             cout << "[X] Invalid Format!\n"
                  << "    The third part must use 'LQ'.\n\n"
                  << "[!] Expected Format: 20XX-XXXXX-LQ-0";
-            valid = false;
+            return false;
             }
 
         //Part 4: Must end with '0', pos 14
@@ -306,18 +304,18 @@ bool validateIDformat(string id, string type){ // ID validation function
             cout << "[X] Invalid Format!\n"
                  << "    Last part must end with '0'.\n\n"
                  << "[!] Expected Format: 20XX-XXXXX-LQ-0";
-            valid = false;
-            }
-        return valid;
-    }
+            return false;
+        }
+        return true;
+     }
+     return false;
 }
 
 void registerUser(){ //registering user function
-    // check array if full/prevent system to crash
-    if (userCount >= maxUser){
+    if (userCount >= maxUser){ // check array if full to prevent system crash
         cout << "\n[!] Maximum number of user reached!\n";
-    return;
-        }
+        return;
+    }
 
     system("cls");
     printHeader();
@@ -340,12 +338,12 @@ void registerUser(){ //registering user function
     cin >> typeChoice;
     cin.ignore();
 
-    bool isValid = false; //to control the loop
+    bool isValid = false; //to control loop
 
     switch (typeChoice){
         case 1:
             type = "Faculty";
-            cout << "\nValid Faculty ID Format: 45617\n";
+            cout << "\nValid Faculty ID Format: XXXXX\n";
 
             do { //to validate ID
                 cout << "> Enter Faculty ID: ";
@@ -355,14 +353,14 @@ void registerUser(){ //registering user function
                     isValid = true;
                 } else {
                 cout << "\n[!] Please try again.\n\n";
-                 }
+                  }
             } while (!isValid);
 
-            break;
+        break;
 
         case 2:
             type = "Student";
-            cout << "\nValid Student ID Format: 2025-12345-LQ-0\n";
+            cout << "\nValid Student ID Format: 20XX-XXXXX-LQ-0\n";
 
             do {
                 cout << "> Enter Student ID: ";
@@ -372,10 +370,10 @@ void registerUser(){ //registering user function
                     isValid = true;
                 } else {
                 cout << "\n[!] Please try again.\n\n";
-                 }
+                  }
             } while (!isValid);
 
-            break;
+        break;
 
         default:
             cout << "\n[X] Invalid choice!\n"
@@ -384,7 +382,7 @@ void registerUser(){ //registering user function
         }
 
     for (int i = 0; i < userCount; i++){
-        if (uIDs[i] == id){
+        if (userID[i] == id){
             cout << "\n[!] Error: ID " << id << " is already registered.\n"
                  << "   Registration cancelled.\n\n"
                  << "> Press Enter to return to menu...";
@@ -394,10 +392,10 @@ void registerUser(){ //registering user function
     }
 
     //save user data
-    uIDs[userCount] = id;
-    uName[userCount] = name;
-    uType[userCount] = type;
-    uProgram[userCount] = program;
+    userID[userCount] = id;
+    userName[userCount] = name;
+    userType[userCount] = type;
+    userProg[userCount] = program;
     userCount++;
     saveData();
 
@@ -415,7 +413,7 @@ bool loginUser(){
              << "    Please register first.\n";
         system("pause");
         return false;
-            }
+    }
 
     system("cls");
     printHeader();
@@ -435,17 +433,17 @@ bool loginUser(){
     //user search
     userIndex = -1; //reset every attempt
     for (int u = 0; u < userCount; u++){
-        if (uIDs[u] == inID && uName[u] == inName){
+        if (userID[u] == inID && userName[u] == inName){
             userIndex = u; //if user found
             break; //stop for search
         }
     }
 
     if (userIndex != -1){ //if user is found
-        currentUName = uName[userIndex];
-        currentUserID = uIDs[userIndex];
-        currentUType = uType[userIndex];
-        currentUProgram = uProgram[userIndex];
+        currentUName = userName[userIndex];
+        currentUserID = userID[userIndex];
+        currentUType = userType[userIndex];
+        currentUProgram = userProg[userIndex];
 
         cout << "                      LOGIN SUCCESSFUL!\n\n";
 
@@ -453,34 +451,32 @@ bool loginUser(){
         printHeader();
 
         cout << "\n\nWelcome, " << currentUName << "! (" << currentUserID << ")\n"
-             << "       " <<currentUType << " of " << currentUProgram << endl
+             << "       " << currentUType << " of " << currentUProgram << endl
              << "\n--------------------------------\n"
              << "   Preparing your dashboard...\n\n"
              << "> Press Enter to access Main Menu...";
         cin.get();
         mainMenu();
-            return true;
+        return true;
 
     } else { //if user is not found
         cout << "\n[X] Invalid Credentials!\n"
              << "    Press 1 to Exit or any other key to try again.\n";
 
-        char choice;
-        cin >> choice;
-            cin.ignore();
+        string input;
+        getline(cin, input);
 
-        if (choice == '1') {
+        if (input == "1") {
                 cout << "\n[!] Login Cancelled.\n";
+                system("pause");
                 return false;
-        } else {
-            system("cls");
-         }
+        }
 
         system("cls");
         printHeader();
             cout << " [!] iSKEDYUL >> LOGIN\n"
                  << "----------------------------------------------------------------\n";
-        }
+      }
     }
 }
 
@@ -490,7 +486,7 @@ void mainMenu(){
     int userIndex = -1;
 
     for (int i = 0; i < userCount; i++) {
-        if (uIDs[i] == currentUserID) {
+        if (userID[i] == currentUserID) {
             userIndex = i;
             break;
         }
@@ -501,7 +497,6 @@ void mainMenu(){
     do {
         system("cls");
         printHeader();
-
 
         cout << "[!] iSKEDYUL >> MAIN MENU\n"
              << "----------------------------------------------------------------\n\n"
@@ -522,19 +517,19 @@ void mainMenu(){
             loadData();
             iSKEDYUL();
             saveData();
-            break;
+        break;
 
         case 2:
             loadData();
             viewRoomStatus();
             saveData();
-            break;
+        break;
 
         case 3:
             loadData();
-            saveData();
             cancelReservation();
-            break;
+            saveData();
+        break;
 
         case 4:
             exitProgram();
@@ -542,7 +537,7 @@ void mainMenu(){
             currentUserID = "";
             currentUType = "";
             currentUName = "";
-            break;
+        break;
 
         default:
             cout << "\n[X] Invalid Choice!\n"
@@ -626,13 +621,13 @@ void iSKEDYUL(){
     //find user name
     int userIndex = -1;
     for (int u = 0; u < userCount; u++){
-        if (uIDs[u] == currentUserID){
+        if (userID[u] == currentUserID){
             userIndex = u;
             break;
         }
     }
     if (userIndex != -1){
-        cout << "Reserved by: " << uName[userIndex] << endl;
+        cout << "Reserved by: " << userName[userIndex] << endl;
     }
     cout << "---------------------------------------\n";
 
@@ -652,8 +647,7 @@ void iSKEDYUL(){
             resUProg[reservationCount] = currentUProgram;
             resStatus[reservationCount] = "Reserved";
             reservationCount++;
-
-            saveData();
+    saveData();
 
             cout << "\n> Reservation Confirmed Successfully!\n";
         } else {
@@ -673,17 +667,19 @@ bool displayBuildingRooms(int &buildingChoice, int &roomChoice,
 
     int userIndex = -1; //finding current user
         for (int u = 0; u < userCount; u++) {
-            if (uIDs[u] == currentUserID) {
+            if (userID[u] == currentUserID) {
                 userIndex = u;
                 break;
             }
         }
+
         cout << " [!] iSKEDYUL >> MAIN MENU >> iSKEDYUL A ROOM\n"
              << "----------------------------------------------------------------\n\n"
              << "> AVAILABLE BUILDINGS:\n\n";
             for (int i = 0; i < 6; i++){
                 cout << "[" << i + 1 << "] " << buildings[i] << "\n";
             }
+
         cout << "-------------------------------------------------------\n"
              << "   Select Building: ";
         cin >> buildingChoice;
@@ -696,7 +692,7 @@ bool displayBuildingRooms(int &buildingChoice, int &roomChoice,
 
     selectedBldg = buildings[buildingChoice - 1]; //count array, index
 
-system("cls");
+    system("cls");
 
         cout << "----------------------------------------------------------------\n"
              << " [!] iSKEDYUL A ROOM >> " << selectedBldg << endl
@@ -742,11 +738,10 @@ system("cls");
             }
         }
     }
-
     return true;
 }
 
-int convertToMinutes(string time){ //helper function to convert time to minute
+int convertToMinutes(string time){ //additional helper function to convert time to minute
     //find specific positions
     size_t colonPosition = time.find(':');
     size_t spacePosition = time.find(' ', colonPosition);
@@ -765,7 +760,8 @@ int convertToMinutes(string time){ //helper function to convert time to minute
 
 bool checkConflict(string buildings, string roomNumbers, string date, string time){
     size_t dashPosition = time.find('-'); //finds dash na nag-sseparate start and end time
-    if (dashPosition == string::npos) return false; //check if invalid format
+    if (dashPosition == string::npos)
+        return false; //check if invalid format
 
     //extracting characters
     string inStart = time.substr(0, dashPosition);
@@ -865,12 +861,11 @@ bool isValidDate(string date){ //date validation
         cout << "\n[!] Invalid Day for this month. Max Days: " << daysInMonth << ".\n\n";
         return false;
     }
-
     return true; //if date is validated
 }
 
 bool ValidTime(string time){ // check if it's not empty
-    // length checker (HH:MM XX-HH:MM XX = 17 char)
+    //Part 1: length checker (HH:MM XX-HH:MM XX = 17 char)
     if (time.length() != 17){
         cout << "\n[!] Invalid Length.\n"
              << "   Format must be exactly: HH:MM AM/PM-HH:MM AM/PM\n"
@@ -878,7 +873,7 @@ bool ValidTime(string time){ // check if it's not empty
         return false;
     }
 
-    // structure position checker
+    //Part 2: colons, space, dash position checker
     if (time[2] != ':' || time[5] != ' ' || time[8] != '-'
         || time [11] != ':' || time[14] != ' '){
             cout << "\n[!] Invalid Format Structure.\n"
@@ -887,7 +882,7 @@ bool ValidTime(string time){ // check if it's not empty
             return false;
         }
 
-    // digit checker
+    //Part 3: digit checker
     int digitIndex[] = {0, 1, 3, 4, 9, 10, 12, 13};
     for (int digit : digitIndex){
         if (!isdigit(time[digit])){
@@ -896,7 +891,7 @@ bool ValidTime(string time){ // check if it's not empty
         }
     }
 
-    //range checker convert to integers
+    //Part 4: range checker convert to integers
     int startHour = stoi(time.substr(0, 2));
     int startMin = stoi(time.substr(3, 2));
     string startAMPM = time.substr(6, 2); // AM/PM
@@ -905,7 +900,7 @@ bool ValidTime(string time){ // check if it's not empty
     int endMin = stoi(time.substr(12, 2));
     string endAMPM = time.substr(15, 2); // AM/PM
 
-    // check start time range
+    //Part 5: check start time range
     if (startHour < 1 || startHour > 12 || startMin < 0 || startMin > 59){
         cout << "\n[!] Invalid Start Time. Hours (01-12), Minutes (00-59).\n\n";
         return false;
@@ -917,13 +912,12 @@ bool ValidTime(string time){ // check if it's not empty
         return false;
     }
 
-    //check if AM/PM
+    //Part 6: check if AM/PM
     if ((startAMPM != "AM" && startAMPM != "PM") ||
         (endAMPM != "AM" && endAMPM != "PM")){
             cout << "\n[!] Invalid Suffix. Must be 'AM' or 'PM'.\n\n";
             return false;
         }
-
     return true;
 }
 
@@ -947,14 +941,14 @@ void viewRoomStatus(){
     switch (choice){
         case 1:
         viewAllBuildings();
-            break;
+        break;
 
         case 2:
         viewOneBuilding();
-            break;
+        break;
 
         case 3:
-            return;
+        return;
 
         default:
             cout << "\n[X] Invalid Choice!\n";
@@ -970,9 +964,18 @@ void viewAllBuildings(){
          << "----------------------------------------------------------------\n\n"
          << "> View All Buildings and Rooms\n";
 
+    //count active reservations
+    int activeReservations = 0;
+    for (int res = 0; res < reservationCount; res++){
+        if (resStatus[res] == "Reserved"){
+            activeReservations++;
+        }
+    }
+
     if (reservationCount == 0){
         cout << "\n[!] No active reservation found.\n\n";
         cout << "> All Rooms are available.\n";
+
     } else {
         cout << "\n> CURRENT RESERVATIONS:\n";
         cout << "============================================================================================================\n"
@@ -980,6 +983,8 @@ void viewAllBuildings(){
              << "============================================================================================================\n";
 
         int rowNumber = 0;
+        int activeCount = 0; //track active reservations in display
+
         //loop all bldg&room
         for (int b = 0; b < maxBuilding; b++){
             for (int r = 0; r < maxRoom; r++){
@@ -989,7 +994,7 @@ void viewAllBuildings(){
                     string roomName = roomNumbers[b][r];
                     string buildingName = buildings[b];
 
-            //check if room has reservation
+            //check if room has active reservation
             bool hasReservation = false;
 
             string currentRoomDate = "";
@@ -999,11 +1004,12 @@ void viewAllBuildings(){
             for (int res = 0; res < reservationCount; res++){
                 if (resBldg[res] == buildingName &&
                     resRoom[res] == roomName &&
-                    resStatus[res] == "Reserved"){
+                    resStatus[res] == "Reserved"){ //only count reserved status
                         hasReservation = true;
                         currentRoomDate = resDate[res];
                         currentRoomTime = resTime[res];
                         reservedBy = resUName[res];
+                        activeCount++;
                         break;
                 }
             }
@@ -1032,8 +1038,8 @@ void viewAllBuildings(){
 
     //summary
     cout << "                                     *** ROOM SUMMARY ***\n";
-    cout << "           > TOTAL ROOMS: " << rowNumber << " | ACTIVE RESERVATIONS: " << reservationCount << "\n\n";
-        }
+    cout << "           > TOTAL ROOMS: " << rowNumber << " | ACTIVE RESERVATIONS: " << activeCount << "\n\n";
+     }
     cout << "> Press Enter to continue...";
     cin.get();
 }
@@ -1057,8 +1063,6 @@ void viewOneBuilding(){
     if (buildingChoice == 0){
         return;
     }
-
-    if (buildingChoice == 0) return;
 
     if (buildingChoice < 1 || buildingChoice > maxBuilding){
         cout << "[X] Invalid building number!\n";
@@ -1094,7 +1098,7 @@ void viewOneBuilding(){
         string roomNumber = roomFullName;
         string roomDescription = "";
 
-        // check for reservations
+        // check for active reservations
         bool isReserved = false;
         string date = "---";
         string time = "---";
@@ -1127,9 +1131,10 @@ void viewOneBuilding(){
              << setw(18) << left << reservedBy.substr(0, 30) << "\n";
         }
     }
+
     cout << "============================================================================================\n\n";
 
-    //summary
+    //room summary
     cout << "                                     *** ROOM SUMMARY ***\n"
          << "       > Total Rooms: " << totalRooms << endl
          << "       > Available: " << availableCount << endl
@@ -1144,9 +1149,9 @@ void viewOneBuilding(){
     cin >> choice;
     cin.ignore();
 
-    if (choice == 2){
+        if (choice == 2){
         return;
-    }
+        }
   }
 }
 
@@ -1207,8 +1212,7 @@ void cancelReservation(){
     int selectedIndex = userBookingIndices[choice - 1];
 
     //print cancellation summary
-    cout << "\n\n"
-         << "       *** CANCELLATION SUMMARY ***\n"
+    cout << "\n\n       *** CANCELLATION SUMMARY ***\n"
          << "---------------------------------------\n"
          << "Building: " << resBldg[selectedIndex] << endl
          << "Room: " << resRoom[selectedIndex] << endl
@@ -1226,9 +1230,9 @@ void cancelReservation(){
 
     if (confirm == 'Y' || confirm == 'y'){ //mark room as cancelled
         resStatus[selectedIndex] = "Cancelled";
+    saveData();
 
-        cout << "\n\n"
-             << "       CANCELLATION SUCCESSFUL!\n"
+        cout << "\n\n       CANCELLATION SUCCESSFUL!\n"
              << "---------------------------------------\n"
              << "Your reservation has been cancelled.\n\n";
 
@@ -1238,7 +1242,6 @@ void cancelReservation(){
 
     cout << "---------------------------------------\n"
          << "> Press Enter to return to Main Menu...";
-    cin.ignore();
     cin.get();
 }
 
@@ -1258,4 +1261,3 @@ void exitProgram(){
          << "> Press Enter to exit the program...";
     cin.ignore();
 }
-
