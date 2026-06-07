@@ -14,14 +14,14 @@ const int maximumUser = 10000;
 const int maximumReservation = 100000;
 
 // [STRUCTURE]
-struct User{
+struct User {
     string id;
     string name;
     string type;
     string program;
 };
 
-struct Reservation{
+struct Reservation {
     string building;
     string room;
     string date;
@@ -39,6 +39,7 @@ Reservation reservations[maximumReservation];
 int userCount = 0;
 int reservationCount = 0;
 
+// to store current logged in user data for session
 User currentUser = {"", "", "", ""};
 
 // 6 PUP building data
@@ -116,13 +117,13 @@ void resettext();
 
 // [FUNCTION TEMPLATE] swap values for bubble sort
 template <typename T>
-    void swapValues(T* a, T* b){
+    void swapValues(T* a, T* b) {
     T temp = *a;
     *a = *b;
     *b = temp;
 }
 
-// [BUBBLE SORT WITH POINTERS] user sorting
+// [BUBBLE SORT WITH POINTERS] sort users array by ID in ascending order for binary search
 void bubbleSortUsers(User* arr, int size) {
     for (int i = 0; i < size - 1; i++) {
         for (int j = 0; j < size - i - 1; j++) {
@@ -133,12 +134,13 @@ void bubbleSortUsers(User* arr, int size) {
     }
 }
 
-// [SELECTION SORT] sort date by reservations
-void reservationByDate(Reservation* arr, int size){
-    for (int i = 0; i < size - 1; i++){
+// [SELECTION SORT] sort reservations by date in ascending order for better organization and display
+void reservationByDate(Reservation* arr, int size) {
+    for (int i = 0; i < size - 1; i++) {
         int minIndex = i;
-        for (int j = i + 1; j < size; j++){
-            if (arr[j].date < arr[minIndex].date){
+        
+        for (int j = i + 1; j < size; j++) {
+            if (arr[j].date < arr[minIndex].date) {
                 minIndex = j;
             }
         }
@@ -148,9 +150,9 @@ void reservationByDate(Reservation* arr, int size){
     }
 }
 
-// [FUNCTION RECURSION & BINARY SEARCH] for user indexing
-int recursiveBinarySearch(User* arr, int low, int high, string targetID){
-    if (high >= low){
+// [FUNCTION RECURSION & BINARY SEARCH] searches for user ID in sorted users array, returns index if found, -1 if not found
+int recursiveBinarySearch(User* arr, int low, int high, string targetID) {
+    if (high >= low) {
         int mid = low + (high - low) / 2;
 
         // target found
@@ -158,7 +160,7 @@ int recursiveBinarySearch(User* arr, int low, int high, string targetID){
             return mid;
 
         // if target is lower, look at the left half
-        if (arr[mid].id > targetID){
+        if (arr[mid].id > targetID) {
             return recursiveBinarySearch(arr, low, mid - 1, targetID);
         }
         // if target is higher, look at the right half
@@ -167,23 +169,24 @@ int recursiveBinarySearch(User* arr, int low, int high, string targetID){
     return -1; //return if ID doesnt exist
 }
 
-// [INSERTION SORT] //insert new user
-void insertUserSorted(User* arr, int& count, const User& newUser){
+// [INSERTION SORT] insert new user in sorted order by ID to maintain sorted array for binary search
+void insertUserSorted(User* arr, int& count, const User& newUser) {
     int i = count - 1;
     // move elements to the right to make room for the new sorted ID
-    while (i >= 0 && arr[i].id > newUser.id){
+    while (i >= 0 && arr[i].id > newUser.id) {
         arr[i + 1] = arr[i];
         i--;
     }
+
     arr[i + 1] = newUser;
     count++;
 }
 
-int main(){
+int main() {
     loadData();
     bool running = true;
 
-    while(running){
+    while(running) {
         system("cls");
         printHeader();
 
@@ -197,30 +200,31 @@ int main(){
              << "   Select option: ";
         cin >> choice;
         cin.ignore();
+        resettext();
 
-    switch (choice){
+    switch (choice) {
         case 1:
             registerUser();
-        break;
+            break;
 
         case 2:
-            if (loginUser()){
+            if (loginUser()) {
                 mainMenu();
             }
-        break;
+            break;
 
         case 3:
             running = false;
-
             printHeader("LOGOUT");
+            
             goldtext();
             cout << "\n[!] Successfully logged out.\n\n"
                  << "Thank you for using iSKEDYUL! <3\n\n";
             resettext();
-        break;
+            break;
 
         default:
-            redtext();
+            maroontext();
             cout << "\n[X] Invalid choice!\n\n"
                  << "[!] Please choose a valid number [1-3].\n\n"
                  << "------------------------------------------\n"
@@ -228,21 +232,15 @@ int main(){
             cin.ignore();
             cin.get();
             resettext();
+            break;
         }
     }
-    system("cls");
-
-    printHeader("LOGOUT");
-    goldtext();
-    cout << "\n[!] Successfully logged out.\n\n"
-         << "Thank you for using iSKEDYUL! <3\n\n";
-    resettext();
 
     saveData();
     return 0;
 }
 
-void printHeader(){
+void printHeader() {
     maroontext();
     printLine('=');
     logo();
@@ -253,7 +251,7 @@ void printHeader(){
     resettext();
 }
 
-void printHeader(string subtitle){
+void printHeader(string subtitle) {
     printHead();
     goldtext();
     printLine('.');
@@ -261,7 +259,7 @@ void printHeader(string subtitle){
     printLine('.');
 }
 
-void printHead(){
+void printHead() {
     system("cls");
     maroontext();
     printLine('=');
@@ -272,7 +270,7 @@ void printHead(){
     printLine('=');
 }
 
-void logo(){
+void logo() {
     goldtext();
     cout << R"(  _  _____ _  ________ _______     ___    _ _
  (_)/ ____| |/ /  ____|  __ \ \   / / |  | | |
@@ -286,12 +284,12 @@ void logo(){
 
 //[FSTREAM, SEQUENTIAL ACCESS FILE]
 //load function - every open ng system; data is not empty
-void loadData(){
+void loadData() {
     ifstream userFile("iSKEDusers.txt"); //for reading file
     ifstream reservationFile("iSKEDreservations.txt");
 
     //load users
-    if (userFile.is_open()){
+    if (userFile.is_open()) {
         userCount = 0;
         
         while(getline(userFile, users[userCount].id, ';') &&
@@ -311,7 +309,7 @@ void loadData(){
     }
 
     //load reservations
-    if (reservationFile.is_open()){
+    if (reservationFile.is_open()) {
         reservationCount = 0;
         
         while(getline(reservationFile, reservations[reservationCount].building, ';') &&
@@ -332,12 +330,12 @@ void loadData(){
 }
 
 //for data to save, temporary to permanent data
-void saveData(){
+void saveData() {
     ofstream userFile("iSKEDusers.txt"); //for writing file
     ofstream reservationFile("iSKEDreservations.txt");
 
     //save users
-    for (int u = 0; u < userCount; u++){
+    for (int u = 0; u < userCount; u++) {
         userFile << users[u].id << ';'
                  << users[u].name << ';'
                  << users[u].type << ';'
@@ -346,7 +344,7 @@ void saveData(){
     userFile.close();
 
     //save reservations
-    for (int r = 0; r < reservationCount; r++){
+    for (int r = 0; r < reservationCount; r++) {
         reservationFile << reservations[r].building << ';'
                         << reservations[r].room << ';'
                         << reservations[r].date << ';'
@@ -359,82 +357,84 @@ void saveData(){
     reservationFile.close();
 }
 
-bool validateID(string id, string type){
-    if (type == "Faculty"){ //valid faculty ID: 5 digits
-        if (id.length() != 5){
+bool validateID(string id, string type) {
+    if (type == "Faculty") { // valid faculty ID: 5 digits
+        if (id.length() != 5) {
             maroontext();
             cout << "[X] Invalid Format! Enter 5 Digits only.\n\n";
+            resettext();
             return false;
         }
 
-        for (int i = 0; i < 5; i++){ //must use digit only
-            if (!isdigit(id[i])){
+        for (int i = 0; i < 5; i++) { // must use digit only
+            if (!isdigit(id[i])) {
                 maroontext();
                 cout << "[X] Faculty ID must contain only digit.\n\n";
-            return false;
+                resettext();
+                return false;
             }
         }
-    return true;
-    } else if (type == "Student") { //Valid student ID Format: 20XX-XXXXX-LQ-0
+        return true;
+    } 
+    else if (type == "Student") { // Valid student ID Format: 20XX-XXXXX-LQ-0
         if (id.length() != 15) {
             maroontext();
             cout << "[X] Invalid Format!\n\n";
             goldtext();
             cout << "[!] Expected Format: 20XX-XXXXX-LQ-0";
+            resettext();
             return false;
         }
-
         // checking of student ID (DASHES)
-        if (id[4] != '-' || id[10] != '-' || id[13] != '-'){
+        if (id[4] != '-' || id[10] != '-' || id[13] != '-') {
             maroontext();
             cout << "[X] Invalid Format! Incorrect Dash Position.\n\n";
+            resettext();
             return false;
         }
-
-    //ID validation per part:
-    bool valid = true;
         //Part 1: must start with "20"
-        if (valid && (id[0] != '2' || id[1] != '0')){
+        if (id[0] != '2' || id[1] != '0') {
             maroontext();
             cout << "[X] ID must start with '20'.\n\n";
+            resettext();
             return false;
         }
 
-        //Part 1.1: check positions 2-3 are digits/year ('25' for 2025)
-        for (int i = 2; i <= 3; i++){
-            if (!isdigit(id[i])){
+        //Part 2: check positions 2-3 are digits/year ('25' for 2025)
+        for (int i = 2; i <= 3; i++) {
+            if (!isdigit(id[i])) {
                 maroontext();
                 cout << "[X] Year must be in digit.\n\n";
-            return false;
-                break;
-            }
-        }
-
-        //Part 2: must be 5 digit Student ID no. (pos 5-9)
-        if (valid){ //to ensure only check if previous parts were valid
-            for (int i = 5; i <= 9; i++){
-                if (!isdigit(id[i])){
-                    maroontext();
-                    cout << "[X] ID must have 5 Digit Student Number.\n\n";
+                resettext();
                 return false;
-                    break;
-                }
             }
         }
 
-        //Part 3: Must be LQ (pos 11-12)
-        if (valid && (id[11] != 'L' || id[12] != 'Q')){
+        //Part 3: must be 5 digit Student ID no. (pos 5-9)
+        for (int i = 5; i <= 9; i++) {
+            if (!isdigit(id[i])) {
+                maroontext();
+                cout << "[X] ID must have 5 Digit Student Number.\n\n";
+                resettext();
+                return false;
+            }
+        }
+
+        //Part 4: Must be LQ (pos 11-12)
+        if (id[11] != 'L' || id[12] != 'Q') {
             maroontext();
             cout << "[X] Invalid Format!\n"
                  << "    The third part must use 'LQ'.\n\n";
+            resettext();
             return false;
-            }
+        }
 
-        //Part 4: Must end with '0', pos 14
-        if (valid && id[14] != '0'){
+        //Part 5: Must end with '0', pos 14
+        if (id[14] != '0') {
             maroontext();
             cout << "[X] Invalid Format!\n"
                  << "    Last part must end with '0'.\n\n";
+            resettext();
             return false;
         }
         return true;
@@ -442,10 +442,11 @@ bool validateID(string id, string type){
      return false;
 }
 
-void registerUser(){
-    if (userCount >= maximumUser){ // check array if full to prevent system crash
+void registerUser() {
+    if (userCount >= maximumUser) { // check array if full to prevent system crash
         maroontext();
         cout << "\n[!] Maximum number of user reached!\n";
+        resettext();
         return;
     }
 
@@ -473,59 +474,59 @@ void registerUser(){
 
     bool isValid = false; //to control loop
 
-    switch(typeChoice){
+    switch(typeChoice) {
         case 1:
             type = "Faculty";
             cout << "\nValid Faculty ID Format: XXXXX\n";
-
-        do{ //to validate ID
+        do { //to validate ID
             goldtext();
             cout << "> Enter Faculty ID: ";
             cin >> id;
+            cin.ignore();
 
             if (validateID(id, "Faculty")){
                 isValid = true;
             } else {
                 maroontext();
                 cout << "\n[!] Please try again.\n\n";
+                resettext(); 
              }
         } while (!isValid);
-
         break;
 
         case 2:
             type = "Student";
             cout << "\nValid Student ID Format: 20XX-XXXXX-LQ-0\n";
-
         do {
             goldtext();
             cout << "> Enter Student ID: ";
             cin >> id;
+            cin.ignore();
 
             if (validateID(id, "Student")){
                 isValid = true;
             } else {
                 maroontext();
                 cout << "\n[!] Please try again.\n\n";
+                resettext();
             }
         } while (!isValid);
-
         break;
 
         default:
             maroontext();
             cout << "\n[X] Invalid choice!\n"
                  << "    Registration cancelled.\n";
-        return;
+            resettext();
+            return;
     }
 
-    if (recursiveBinarySearch(users, 0, userCount - 1, id) != -1){
+    if (recursiveBinarySearch(users, 0, userCount - 1, id) != -1) { //check if ID already exists in system
         goldtext();
         cout << "\n[!] Error: ID " << id << " is already registered.\n";
         resettext();
         cout << "   Registration cancelled.\n\n"
              << "> Press Enter to return to menu...";
-        cin.ignore();
         cin.get();
         return;
     }
@@ -559,7 +560,6 @@ void registerUser(){
 
     User newUser = {id, name, type, program};
     insertUserSorted(users, userCount, newUser);
-
     saveData();
 
     maroontext();
@@ -567,16 +567,16 @@ void registerUser(){
          << "      You can now login.\n\n"
          << "---------------------------------\n"
          << "> Press Enter to continue...";
-    cin.ignore();
-    cin.get();
     resettext();
+    cin.get();
 }
 
 bool loginUser(){
-    if (userCount == 0){ //system will not accept login if no registered user
+    if (userCount == 0) { // will not accept login if no registered user
         maroontext();
         cout << "\n[!] No users registered yet.\n"
              << "    Please register first.\n";
+        resettext();
         system("pause");
         return false;
     }
@@ -587,7 +587,7 @@ bool loginUser(){
     int userIndex = -1;
     string inputName, inputID;
 
-    while (true){
+    while (true) {
         goldtext();
         cout << "\nEnter Full Name: ";
             getline(cin, inputName);
@@ -596,11 +596,11 @@ bool loginUser(){
 
     userIndex = recursiveBinarySearch(users, 0, userCount - 1, inputID); //find user indexing
 
-    if (userIndex != -1 && users[userIndex].name != inputName){
+    if (userIndex != -1 && users[userIndex].name != inputName) {
         userIndex = -1;
     }
 
-    if (userIndex != -1){
+    if (userIndex != -1) { // if user found, set current user data for session
         currentUser.name = users[userIndex].name;
         currentUser.id = users[userIndex].id;
         currentUser.type = users[userIndex].type;
@@ -614,13 +614,14 @@ bool loginUser(){
         goldtext();
         cout << "\n\nWelcome, " << currentUser.name << "! (" << currentUser.id << ")\n"
              << "       " << currentUser.type << " of " << currentUser.program << endl;
+        
         maroontext();
         printLine('-');
         Sleep(1000);
         cout << "   Preparing your dashboard...\n\n"
              << "> Press Enter to access Main Menu...";
         cin.get();
-
+        resettext();
         return true;
 
     } else {
@@ -633,10 +634,11 @@ bool loginUser(){
         getline(cin, input);
 
         if (input == "1") {
-                maroontext();
-                cout << "\n[!] Login Cancelled.\n";
-                system("pause");
-                return false;
+            maroontext();
+            cout << "\n[!] Login Cancelled.\n";
+            resettext();
+            system("pause");
+            return false;
         }
       }
     }
@@ -656,9 +658,9 @@ void mainMenu(){
         maroontext();
         cout << "MAIN MENU - Logged in as: " << currentUser.name << " ("
              << currentUser.id << ")\n";
+        resettext();
         goldtext();
         printLine('-');
-        goldtext();
         cout << "[1] iSKEDYUL a Room\n"
              << "[2] View Room Status\n"
              << "[3] Edit Reservation\n"
@@ -669,26 +671,26 @@ void mainMenu(){
         cin >> choice;
         cin.ignore();
 
-    switch (choice){
+    switch (choice) {
         case 1:
             iSKEDYUL();
             saveData();
-        break;
+            break;
 
         case 2:
             viewRoomStatus();
             saveData();
-        break;
+            break;
 
         case 3:
             editReservation();
             saveData();
-        break;
+            break;
 
         case 4:
             cancelReservation();
             saveData();
-        break;
+            break;
 
         case 5:
             exitProgram();
@@ -697,7 +699,7 @@ void mainMenu(){
             currentUser.type = "";
             currentUser.name = "";
             currentUser.program = "";
-        break;
+            break;
 
         default:
             maroontext();
@@ -705,7 +707,7 @@ void mainMenu(){
                  << "    Please try again.\n\n"
                  << "--------------------------------\n"
                  << "> Press Enter to continue...";
-            cin.ignore();
+            resettext();
             cin.get();
             break;
         }
@@ -742,8 +744,8 @@ void iSKEDYUL(){
         }
     } while (!validDate);
 
-    char bookMore;
-    do{
+    char bookMore = 'N';
+    do {
         system("cls");
         printHead();
         goldtext();
@@ -755,7 +757,7 @@ void iSKEDYUL(){
 
         string userTimeInput;
         bool validTimeFlag = false;
-        do{
+        do {
             goldtext();
             cout << "Enter Time Slot (HH:MM AM/PM-HH:MM AM/PM): ";
             getline(cin, userTimeInput);
@@ -773,11 +775,21 @@ void iSKEDYUL(){
         if (checkConflict(selectedBuilding, selectedRoom, date, userTimeInput)){
             maroontext();
             cout << "\n\n[!] This slot is already reserved or conflicts with an existing schedule.\n\n";
+            resettext();
+            
             goldtext();
             cout << "Would you like to try another timeslot for today? (Y/N): ";
             cin >> bookMore;
             cin.ignore();
-            continue;
+            if (bookMore == 'Y' || bookMore == 'y') {
+                continue; // try another time on the same date
+            } else {
+                // user does not want to try another time, cancel reservation process
+                cout << "\n[!] Reservation cancelled.\n";
+                resettext();
+                system("pause");
+                return;
+            }
         }
 
         cout << endl;
@@ -791,9 +803,11 @@ void iSKEDYUL(){
              << "   Time: " << userTimeInput << endl;
 
         int userIndex = recursiveBinarySearch(users, 0, userCount - 1, currentUser.id);
+        
         if (userIndex != -1){
             cout << "Reserved by: " << users[userIndex].name << endl;
         }
+        
         goldtext();
         printLine('-');
 
@@ -803,8 +817,8 @@ void iSKEDYUL(){
         cin >> confirm;
         cin.ignore();
 
-        if (confirm == 'Y' || confirm == 'y'){
-            if (reservationCount < maximumReservation){
+        if (confirm == 'Y' || confirm == 'y') {
+            if (reservationCount < maximumReservation) {
                 reservations[reservationCount].building = selectedBuilding;
                 reservations[reservationCount].room = selectedRoom;
                 reservations[reservationCount].date = date;
@@ -817,7 +831,7 @@ void iSKEDYUL(){
 
         saveData();
 
-                greentext();
+            greentext();
                 cout << "\n> Reservation Confirmed Successfully!\n";
                 resettext();
             } else {
@@ -826,6 +840,7 @@ void iSKEDYUL(){
                 resettext();
                 break;
             }
+
         } else {
             goldtext();
             cout << "\n[X] Reservation cancelled.\n";
@@ -840,19 +855,19 @@ void iSKEDYUL(){
     } while (bookMore == 'Y' || bookMore == 'y');
 }
 
-void editReservation(){
+void editReservation() {
     printHeader("iSKEDYUL >> MAIN MENU >> EDIT RESERVATION");
 
     int userBookingIndices[maximumReservation];
     int userBookingCount = 0;
 
     for (int i = 0; i < reservationCount; i++) {
-        if (reservations[i].userID == currentUser.id && reservations[i].status == "Reserved"){
+        if (reservations[i].userID == currentUser.id && reservations[i].status == "Reserved") {
             userBookingIndices[userBookingCount] = i;
-        userBookingCount++;
+            userBookingCount++;
         }
     }
-    if (userBookingCount == 0){
+    if (userBookingCount == 0) {
         redtext();
         cout << "\n[!] You have no active reservations to edit.\n";
         resettext();
@@ -861,12 +876,13 @@ void editReservation(){
     }
     maroontext();
     cout << "> Your Active Reservations:\n";
+    resettext();
     whitetext();
     cout << "=============================================================\n"
          << " #  | Building             | Room          | Date       | Time\n"
          << "=============================================================\n";
 
-    for (int i = 0; i < userBookingCount; i++){
+    for (int i = 0; i < userBookingCount; i++) {
         int idx = userBookingIndices[i];
         cout << " " << (i + 1) << "  | "
              << setw(20) << left << reservations[idx].building.substr(0, 20) << " | "
@@ -878,8 +894,17 @@ void editReservation(){
     cout << "=============================================================\n";
     goldtext();
     cout << "\nSelect reservation to edit (0 to cancel): ";
+    
     int choice;
-    cin >> choice;
+    if(!(cin >> choice)) {
+        cin.clear();
+        cin.ignore(10000, '\n');
+        redtext();
+        cout << "\n[X] Invalid input! Please enter a number.\n";
+        resettext();
+        system("pause");
+        return;
+    }
     cin.ignore();
 
     if (choice < 1 || choice > userBookingCount){
@@ -898,9 +923,34 @@ void editReservation(){
          << "[3] Both Date and Time\n"
          << "[0] Cancel\n\n"
          << "> Choice: ";
+    resettext();
     int editChoice;
-    cin >> editChoice;
+    if (!(cin >> editChoice)) {
+        cin.clear();
+        cin.ignore(10000, '\n');
+        redtext();
+        cout << "\n[X] Invalid input! Please enter a number.\n";
+        resettext();
+        system("pause");
+        return;
+    }
     cin.ignore();
+
+    if (editChoice == 0) {
+        goldtext();
+        cout << "\n[X] Edit cancelled. Returning to menu.\n";
+        resettext();
+        system("pause");
+        return;
+    }
+
+    if (editChoice < 1 || editChoice > 3) {
+        redtext();
+        cout << "\n[X] Invalid choice. Edit cancelled.\n";
+        resettext();
+        system("pause");
+        return;
+    }
 
     string newDate  = reservations[selectedIndex].date;
     string newTime  = reservations[selectedIndex].time;
@@ -910,6 +960,7 @@ void editReservation(){
         do {
             goldtext();
             cout << "New Date (MM/DD/YYYY): ";
+            resettext();
             cin >> newDate;
             cin.ignore();
             validDate = isValidDate(newDate);
@@ -936,30 +987,20 @@ void editReservation(){
         } while (!validTime);
     }
 
-    if (editChoice < 1 || editChoice > 3) {
+    //check conflict before making any changes
+    if(checkConflict(reservations[selectedIndex].building,
+                     reservations[selectedIndex].room,
+                     newDate, newTime)) {
         redtext();
-        cout << "\n[!] Edit cancelled.\n";
+        cout << "\n[X] The new slot conflicts with another reservation. Edit cancelled.\n";
         resettext();
         system("pause");
         return;
     }
 
-    reservations[selectedIndex].status = "Cancelled";
-
-    if (checkConflict(reservations[selectedIndex].building,
-                      reservations[selectedIndex].room,
-                      newDate, newTime)) {
-        reservations[selectedIndex].status = "Reserved";
-        redtext();
-        cout << "\n[!] The new slot conflicts with another reservation. Edit cancelled.\n";
-        resettext();
-        system("pause");
-        return;
-    }
-
-    reservations[selectedIndex].date   = newDate;
-    reservations[selectedIndex].time   = newTime;
-    reservations[selectedIndex].status = "Reserved";
+    // update reservation with new date and time
+    reservations[selectedIndex].date = newDate;
+    reservations[selectedIndex].time = newTime;
     saveData();
 
     greentext();
@@ -977,58 +1018,83 @@ bool displayBuildingRooms(int &buildingChoice, int &roomChoice,
     selectedBuilding = "";
     selectedRoom = "";
 
-    int userIndex = recursiveBinarySearch(users, 0, userCount - 1, currentUser.id);
+    printHeader("iSKEDYUL >> MAIN MENU >> iSKEDYUL A ROOM");
+    maroontext();
+    cout << "\n> AVAILABLE PUP BUILDINGS:\n\n";
+    resettext();
+    whitetext();
+    for (int i = 0; i < 6; i++){
+        cout << "[" << i + 1 << "] " << buildingName[i] << "\n";
+    }
+    resettext();
+    maroontext();
+    printLine('-');
+    goldtext();
+    cout << "   Select Building: ";
+    resettext();
 
-        printHeader("iSKEDYUL >> MAIN MENU >> iSKEDYUL A ROOM");
+    //validate if input is a number and within range of building options
+    if (!(cin >> buildingChoice)) {
+        cin.clear();
+        cin.ignore(10000, '\n');
         maroontext();
-        cout << "\n> AVAILABLE PUP BUILDINGS:\n\n";
-        whitetext();
-            for (int i = 0; i < 6; i++){
-                cout << "[" << i + 1 << "] " << buildingName[i] << "\n";
-            }
-        maroontext();
-        printLine('-');
-        goldtext();
-        cout << "   Select Building: ";
-        cin >> buildingChoice;
+        cout << "\n[X] Invalid input! Please enter a number.\n";
+        resettext();
+        return false;
+    }
 
-        if (buildingChoice < 1 || buildingChoice > 6){
-            maroontext();
-            cout << "\n[X] Invalid Building!\n"
-                 << "    Please choose between (1-6).\n";
-            return false;
-        }
+    if (buildingChoice < 1 || buildingChoice > 6){
+        maroontext();
+        cout << "\n[X] Invalid Building!\n"
+             << "    Please choose between (1-6).\n";
+        resettext();
+        return false;
+    }
 
     selectedBuilding = buildingName[buildingChoice - 1];
 
     system("cls");
     printHeader();
-        goldtext();
-        printLine('-');
-        cout << " [!] iSKEDYUL A ROOM >> " << selectedBuilding << endl;
-        printLine('-');
-        maroontext();
-        cout << "\nChoose a room:\n";
+    goldtext();
+    printLine('-');
+    cout << " [!] iSKEDYUL A ROOM >> " << selectedBuilding << endl;
+    printLine('-');
+    resettext();
+    maroontext();
+    cout << "\nChoose a room:\n";
+    resettext();
 
     int roomCount = 0;
     //add [number] choice to room
     whitetext();
-        for (int r = 0; r < rooms; r++){
-            if (roomNumbers[buildingChoice - 1][r] != ""){
-                roomCount++;
-            }
+    for (int r = 0; r < rooms; r++) {
+        if (roomNumbers[buildingChoice - 1][r] != "") {
+            roomCount++;
         }
-        //prints room in chosen bldg
-        whitetext();
-        for (int r = 0;  r < roomCount; r++){
-            cout << "[" << r + 1 << "] " << roomNumbers[buildingChoice - 1][r] << "\n";
-        }
+    }
+    
+    //prints room in chosen bldg
+    whitetext();
+    for (int r = 0;  r < roomCount; r++){
+        cout << "[" << r + 1 << "] " << roomNumbers[buildingChoice - 1][r] << "\n";
+    }
 
+    resettext();
+    maroontext();
+    printLine('-');
+    goldtext();
+    cout << "Room Choice: ";
+    resettext();
+    
+    //validate if input is a number and within range of room options
+    if(!(cin >> roomChoice)) {
+        cin.clear();
+        cin.ignore(10000, '\n');
         maroontext();
-        printLine('-');
-        goldtext();
-        cout << "Room Choice: ";
-        cin >> roomChoice;
+        cout << "\n[X] Invalid input! Please enter a number.\n";
+        resettext();
+        return false;
+    }
 
     //if user choice < 1, system will not continue
     if (roomChoice < 1 ||  roomChoice > roomCount) {
@@ -1038,6 +1104,7 @@ bool displayBuildingRooms(int &buildingChoice, int &roomChoice,
              << "[!] Please choose a valid room number.\n\n"
              << "----------------------------------------\n"
              << "> Press Enter to try again...";
+        resettext();
         cin.ignore();
         cin.get();
         return false;
@@ -1045,10 +1112,10 @@ bool displayBuildingRooms(int &buildingChoice, int &roomChoice,
 
     //finding selected room, skipping empty room strings ""
     int counter = 0;
-    for (int r = 0; r < rooms; r++){
-        if (roomNumbers[buildingChoice - 1][r]!= ""){
+    for (int r = 0; r < rooms; r++) {
+        if (roomNumbers[buildingChoice - 1][r]!= "") {
             counter++;
-            if (counter == roomChoice){
+            if (counter == roomChoice) {
                 selectedRoom = roomNumbers[buildingChoice - 1][r];
                 break;
             }
@@ -1058,14 +1125,14 @@ bool displayBuildingRooms(int &buildingChoice, int &roomChoice,
 }
 
 //additional helper function to convert time to minute
-int convertToMinutes(int hour, int minute, string ampm){
+int convertToMinutes(int hour, int minute, string ampm) {
     //convert to 24-hour format time
     if (ampm == "PM" && hour != 12) hour += 12;
     if (ampm == "AM" && hour == 12) hour = 0;
     return (hour * 60) + minute;
 }
 
-int convertToMinutes(string time){
+int convertToMinutes(string time) {
     //find specific positions
     size_t colon = time.find(':');
     size_t space = time.find(' ', colon);
@@ -1090,7 +1157,7 @@ bool checkConflict(string buildingName, string roomNumbers,
     int intStart = convertToMinutes(inStart);
     int intEnd = convertToMinutes(inEnd);
 
-    for (int i = 0; i < reservationCount; i++){
+    for (int i = 0; i < reservationCount; i++) {
         if (reservations[i].building == buildingName &&
             reservations[i].room == roomNumbers &&
             reservations[i].date == date &&
@@ -1105,7 +1172,7 @@ bool checkConflict(string buildingName, string roomNumbers,
             int existStart = convertToMinutes(existingStartTime);
             int existEnd = convertToMinutes(existingEndTime);
 
-            if (intStart < existEnd && existStart < intEnd){
+            if (intStart < existEnd && existStart < intEnd) {
                 return true;
             }
         }
@@ -1113,24 +1180,24 @@ bool checkConflict(string buildingName, string roomNumbers,
         return false;
 }
 
-bool isValidDate(string date){
+bool isValidDate(string date) {
     if (date.length()!= 10){
         maroontext();
         cout << "\n[!] Date Format must be (MM/DD/YYYY).\n\n";
         return false;
     }
 
-    if (date[2] != '/' || date[5] != '/'){
+    if (date[2] != '/' || date[5] != '/') {
         maroontext();
         cout << "\n[!] Date must use '/' as separator\n"
              << "    Date Format: (MM/DD/YYYY)\n\n";
         return false;
     }
 
-    for (int d = 0; d < 10; d++){
+    for (int d = 0; d < 10; d++) {
         if (d == 2 || d == 5)
             continue;
-        if (!isdigit(date[d])){
+        if (!isdigit(date[d])) {
             maroontext();
             cout << "\n[!] Date must contain only numbers except slashes '/'.\n\n";
             return false;
@@ -1155,7 +1222,7 @@ bool isValidDate(string date){
 
     int daysInMonth;
 
-    if (month == 2){
+    if (month == 2) {
         maroontext();
         bool isLeap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
         if (isLeap){
@@ -1164,14 +1231,14 @@ bool isValidDate(string date){
             daysInMonth = 28;
           }
     }
-    else if (month == 4 || month == 6 || month == 9 || month == 11){
+    else if (month == 4 || month == 6 || month == 9 || month == 11) {
         daysInMonth = 30;
     }
     else {
         daysInMonth = 31;
     }
 
-    if (day <  1 || day > daysInMonth){
+    if (day <  1 || day > daysInMonth) {
         maroontext();
         cout << "\n[!] Invalid Day for this month. Max Days: " << daysInMonth << ".\n\n";
         return false;
@@ -1179,8 +1246,8 @@ bool isValidDate(string date){
     return true;
 }
 
-bool ValidTime(string time){
-    if (time.length() != 17){
+bool ValidTime(string time) {
+    if (time.length() != 17) {
         maroontext();
         cout << "\n[!] Invalid Length.\n"
              << "    Format must be exactly: HH:MM AM/PM-HH:MM AM/PM\n"
@@ -1189,7 +1256,7 @@ bool ValidTime(string time){
     }
 
     if (time[2] != ':' || time[5] != ' ' || time[8] != '-'
-        || time [11] != ':' || time[14] != ' '){
+        || time [11] != ':' || time[14] != ' ') {
             maroontext();
             cout << "\n[!] Invalid Format Structure.\n"
                  << "    Missing colons, spaces, or dash in correct places.\n"
@@ -1198,8 +1265,9 @@ bool ValidTime(string time){
         }
 
     int digitIndex[] = {0, 1, 3, 4, 9, 10, 12, 13};
-    for (int digit : digitIndex){
-        if (!isdigit(time[digit])){
+
+    for (int digit : digitIndex) {
+        if (!isdigit(time[digit])) {
             maroontext();
             cout << "\n[!] Time must contain numbers for Hours and Minutes.\n\n";
             return false;
@@ -1214,19 +1282,19 @@ bool ValidTime(string time){
     int endMin = stoi(time.substr(12, 2));
     string endAMPM = time.substr(15, 2);
 
-    if (startHour < 1 || startHour > 12 || startMin < 0 || startMin > 59){
+    if (startHour < 1 || startHour > 12 || startMin < 0 || startMin > 59) {
         maroontext();
         cout << "\n[!] Invalid Start Time. Hours (01-12), Minutes (00-59).\n\n";
         return false;
     }
 
-    if (endHour < 1 || endHour > 12 || endMin < 0 || endMin > 59){
+    if (endHour < 1 || endHour > 12 || endMin < 0 || endMin > 59) {
         maroontext();
         cout << "\n[!] Invalid End Time. Hours (01-12), Minutes (00-59).\n\n";
         return false;
     }
 
-    if ((startAMPM != "AM" && startAMPM != "PM") || (endAMPM != "AM" && endAMPM != "PM")){
+    if ((startAMPM != "AM" && startAMPM != "PM") || (endAMPM != "AM" && endAMPM != "PM")) {
         maroontext();
         cout << "\n[!] Invalid Suffix. Must be 'AM' or 'PM'.\n\n";
         return false;
@@ -1235,10 +1303,11 @@ bool ValidTime(string time){
     return true;
 }
 
-void viewRoomStatus(){
-    printHeader("iSKEDYUL >> MAIN MENU >> ROOM STATUS AND AVAILABILITY");
-
+void viewRoomStatus() {
     int choice;
+    while (true) {
+        printHeader("iSKEDYUL >> MAIN MENU >> ROOM STATUS AND AVAILABILITY");
+    
     goldtext();
     cout << "VIEW OPTIONS: \n"
          << "[1] View All Buildings & Rooms\n"
@@ -1246,18 +1315,27 @@ void viewRoomStatus(){
          << "[3] Back to Main Menu\n\n"
          << "-----------------------------------\n"
          << "Enter choice: ";
-    cin >> choice;
-    cin.ignore();
     resettext();
 
-    switch (choice){
+    //input validation
+    if (!(cin >> choice)) {
+        cin.clear();
+        cin.ignore(10000, '\n');
+        redtext();
+        cout << "\n[X] Invalid input! Please enter a number.\n";
+        resettext();
+        system("pause");
+        continue;
+    }
+
+    switch (choice) {
         case 1:
         viewAllBuildingName();
-        break;
+        return;
 
         case 2:
         viewOneBuilding();
-        break;
+        return;
 
         case 3:
             return;
@@ -1266,11 +1344,12 @@ void viewRoomStatus(){
             redtext();
             cout << "\n[X] Invalid Choice!\n";
             system("pause");
-            viewRoomStatus();
+            break;
+      }
     }
 }
 
-void viewAllBuildingName(){
+void viewAllBuildingName() {
     loadData(); //reload to update any changes before
     system("cls");
     printHeader("iSKEDYUL >> MAIN MENU >> ROOM STATUS AND AVAILABILITY");
@@ -1279,14 +1358,7 @@ void viewAllBuildingName(){
     cout << "> View All Buildings and Rooms\n";
     resettext();
 
-    int activeReservations = 0;
-    for (int res = 0; res < reservationCount; res++){
-        if (reservations[res].status == "Reserved"){
-            activeReservations++;
-        }
-    }
-
-    if (reservationCount == 0){
+    if (reservationCount == 0) {
         cout << "\n[!] No active reservation found.\n\n";
         cout << "> All Rooms are available.\n";
 
@@ -1297,13 +1369,14 @@ void viewAllBuildingName(){
         cout << "=========================================================================================================================================\n"
              << "  #  | Building             | Room          | Date          | Time Slot          | Status      | Reserved By\n"
              << "=========================================================================================================================================\n";
+        resettext();
 
         int rowNumber = 0;
         int activeCount = 0;
 
-        for (int b = 0; b < building; b++){
-            for (int r = 0; r < rooms; r++){
-                if (roomNumbers[b][r] != ""){
+        for (int b = 0; b < building; b++) {
+            for (int r = 0; r < rooms; r++) {
+                if (roomNumbers[b][r] != "") {
                     rowNumber++;
 
         string roomName = roomNumbers[b][r];
@@ -1314,10 +1387,10 @@ void viewAllBuildingName(){
         string currentRoomTime = "";
         string reservedBy = "";
 
-        for (int res = 0; res < reservationCount; res++){
+        for (int res = 0; res < reservationCount; res++) {
             if (reservations[res].building == bldgName &&
                 reservations[res].room == roomName &&
-                reservations[res].status == "Reserved"){
+                reservations[res].status == "Reserved") {
 
                 hasReservation = true;
                 activeCount++;
@@ -1333,7 +1406,7 @@ void viewAllBuildingName(){
             }
         }
 
-        if (!hasReservation){
+        if (!hasReservation) {
                     cout << "| " << setw(2) << right << rowNumber << " | "
                          << setw(20) << left << bldgName.substr(0, 20) << " | "
                          << setw(13) << left << roomName.substr(0, 13) << " | "
@@ -1350,18 +1423,21 @@ void viewAllBuildingName(){
     maroontext();
     cout << "                                                      *** ROOM SUMMARY ***\n";
     resettext();
+    
     cout << "                   > TOTAL ROOMS: " << rowNumber << " | TOTAL ACTIVE RESERVATIONS: " << activeCount << "\n\n";
+    }
+
     cout << "> Press Enter to continue...";
     cin.get();
 }
-}
 
-void viewOneBuilding(){
+void viewOneBuilding() {
     loadData();
-    while (true){
+    while (true) {
         printHeader("iSKEDYUL >> MAIN MENU >> ROOM STATUS AND AVAILABILITY");
         resettext();
         maroontext();
+
         cout << "> View Specific Building and Rooms\n";
         resettext();
 
@@ -1373,9 +1449,20 @@ void viewOneBuilding(){
         }
         goldtext();
         cout << "[0] Back to Selecting Building\n\n";
+        resettext();
         maroontext();
         cout << "Enter Building Number: ";
-        cin >> buildingChoice;
+        resettext();
+        
+        if (!(cin >> buildingChoice)) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            redtext();
+            cout << "\n[X] Invalid input! Please enter a number.\n";
+            resettext();
+            system("pause");
+            continue;
+        }
         cin.ignore();
 
         if (buildingChoice == 0){
@@ -1385,6 +1472,7 @@ void viewOneBuilding(){
         if (buildingChoice < 1 || buildingChoice > building){
             redtext();
             cout << "[X] Invalid building number!\n";
+            resettext();
             system("pause");
             continue;
         }
@@ -1395,27 +1483,27 @@ void viewOneBuilding(){
         printHeader("iSKEDYUL >> MAIN MENU >> ROOM STATUS AND AVAILABILITY");
         whitetext();
         cout << "> " << selectedBuilding << endl;
-        whitetext();
         cout << "===============================================================================================\n"
              << " #  | Room           | Date       | Time Slot           | Status     | Reserved By\n"
              << "===============================================================================================\n";
+        resettext();
 
         int totalRooms = 0;
         int reservedCount = 0;
         int availableCount = 0;
 
-        for (int r = 0; r < rooms; r++){
-            if (roomNumbers[bldgIndex][r] != ""){
+        for (int r = 0; r < rooms; r++) {
+            if (roomNumbers[bldgIndex][r] != "") {
                 totalRooms++;
 
                 string roomFullName = roomNumbers[bldgIndex][r];
                 bool isReserved = false;
 
                 // check for reservations matching this room
-                for (int res = 0; res < reservationCount; res++){
+                for (int res = 0; res < reservationCount; res++) {
                     if (reservations[res].building == selectedBuilding &&
                         reservations[res].room == roomFullName &&
-                        reservations[res].status == "Reserved"){
+                        reservations[res].status == "Reserved") {
 
                         isReserved = true;
                         reservedCount++;
@@ -1431,7 +1519,7 @@ void viewOneBuilding(){
                 }
 
                 // if no active reservation exists
-                if (!isReserved){
+                if (!isReserved) {
                     availableCount++;
 
                     cout << "| " << setw(2) << right << totalRooms << " | "
@@ -1448,9 +1536,11 @@ void viewOneBuilding(){
         cout << "===============================================================================================\n\n";
         maroontext();
         cout << "                                                      *** ROOM SUMMARY ***\n";
+        resettext();
         goldtext();
         cout << "                   > AVAILABLE: " << availableCount << " | RESERVED: " << reservedCount << " | TOTAL ROOMS: " << totalRooms << "\n\n";
         resettext();
+
         int choice;
         printLine('-');
         cout << "[1] View another building\n"
@@ -1458,7 +1548,17 @@ void viewOneBuilding(){
         printLine('-');
         goldtext();
         cout << "Enter choice: ";
-        cin >> choice;
+        resettext();
+        
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            redtext();
+            cout << "\n[X] Invalid input! Please enter a number.\n";
+            resettext();
+            system("pause");
+            continue;
+        }
         cin.ignore();
 
         if (choice == 2){
@@ -1490,8 +1590,9 @@ void cancelReservation(){
     }
 
     goldtext();
-    cout << "Your Active iSKEDYUL:\n"
-         << "============================================================================================\n"
+    cout << "Your Active iSKEDYUL:\n";
+    resettext();
+    cout << "============================================================================================\n"
          << "# | Building             | Room            | Date                | Time Slot\n"
          << "============================================================================================\n";
 
@@ -1506,11 +1607,22 @@ void cancelReservation(){
 
     cout << "============================================================================================\n";
     maroontext();
-    int choice;
+
     cout << "\n> Select a reservation to cancel: ";
-        cin >> choice;
-        cin.ignore();
+    resettext();
+
+    int choice;
+    if(!(cin >> choice)) {
+        cin.clear();
+        cin.ignore(10000, '\n');
+        redtext();
+        cout << "\n[X] Invalid input! Please enter a number.\n";
         resettext();
+        system("pause");
+        return;
+    }
+    cin.ignore();
+    resettext();
 
     if(choice < 1 || choice > userBookingCount){
         redtext();
@@ -1543,7 +1655,7 @@ void cancelReservation(){
 
     if (confirm == 'Y' || confirm == 'y'){
         reservations[selectedIndex].status = "Cancelled";
-    saveData();
+
         goldtext();
         cout << "\n\n       CANCELLATION SUCCESSFUL!\n"
              << "---------------------------------------\n"
@@ -1563,6 +1675,7 @@ void exitProgram(){
 
     maroontext();
     cout << "Thank you for using iSKEDYUL!\n";
+    resettext();
     saveData();
 
     goldtext();
@@ -1571,7 +1684,8 @@ void exitProgram(){
          << "Goodbye, " << currentUser.name << "!\n\n"
          << "----------------------------------------------------------------\n\n"
          << "> Press Enter to exit the program...";
-    cin.ignore();
+    resettext();
+    cin.get();
 }
 
 void printColoredStatus(string status){
